@@ -1,19 +1,17 @@
 import os
-import pickle
 import requests
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
 
 # Blogger API Scope
 SCOPES = ["https://www.googleapis.com/auth/blogger"]
 
-# Load credentials from secrets
+# Load credentials from GitHub Secrets
 BLOG_ID = os.getenv("BLOG_ID")
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REFRESH_TOKEN = os.getenv("REFRESH_TOKEN")
+
+# Set the minimum discount percentage required to post
+MIN_DISCOUNT_PERCENT = 30  # Change this value as needed
 
 def get_access_token():
     """Fetches a new access token using the refresh token."""
@@ -26,6 +24,20 @@ def get_access_token():
     }
     response = requests.post(token_url, data=payload)
     return response.json().get("access_token")
+
+def fetch_deals():
+    """Simulated function to fetch product deals (replace this with real data)."""
+    deals = [
+        {"title": "🔥 Smartwatch", "old_price": 5000, "new_price": 3000, "link": "https://www.amazon.in/deal1"},
+        {"title": "🎧 Wireless Earbuds", "old_price": 2000, "new_price": 1800, "link": "https://www.amazon.in/deal2"},
+        {"title": "💻 Laptop", "old_price": 60000, "new_price": 42000, "link": "https://www.amazon.in/deal3"},
+    ]
+    return deals
+
+def calculate_discount(old_price, new_price):
+    """Calculates discount percentage."""
+    discount = ((old_price - new_price) / old_price) * 100
+    return round(discount, 2)
 
 def post_to_blogger(title, content):
     """Posts a new deal to Blogger."""
@@ -41,13 +53,17 @@ def post_to_blogger(title, content):
     response = requests.post(url, json=data, headers=headers)
     
     if response.status_code == 200:
-        print("✅ Post successfully published!")
+        print(f"✅ Post '{title}' successfully published!")
     else:
         print(f"❌ Error: {response.status_code} - {response.text}")
 
 if __name__ == "__main__":
-    # Example Deal Post
-    title = "🔥 Amazing Deal: 50% OFF on Smartwatch!"
-    content = "<p>Get 50% off on the latest Smartwatch. Hurry, limited time offer! <a href='https://www.amazon.in/deal-link'>Buy Now</a></p>"
-
-    post_to_blogger(title, content)
+    deals = fetch_deals()
+    for deal in deals:
+        discount = calculate_discount(deal["old_price"], deal["new_price"])
+        if discount >= MIN_DISCOUNT_PERCENT:
+            title = f"🔥 {deal['title']} - {discount}% OFF!"
+            content = f"<p>Original Price: <s>₹{deal['old_price']}</s><br>Discounted Price: ₹{deal['new_price']}<br><a href='{deal['link']}'>Buy Now</a></p>"
+            post_to_blogger(title, content)
+        else:
+            print(f"❌ Skipping {deal['title']} - Only {discount}% OFF (Less than {MIN_DISCOUNT_PERCENT}%)")
