@@ -11,7 +11,7 @@ CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REFRESH_TOKEN = os.getenv("REFRESH_TOKEN")
 
 # Set the minimum discount percentage required to post
-MIN_DISCOUNT_PERCENT = 30  # Change this value as needed
+MIN_DISCOUNT_PERCENT = 5  # Change this value as needed
 
 def get_access_token():
     """Fetches a new access token using the refresh token."""
