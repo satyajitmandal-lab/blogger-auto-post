@@ -1,28 +1,27 @@
 name: Auto Post Deals to Blogger
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:  # Allows manual execution
+  schedule:
+    - cron: "*/10 * * * *"  # Runs every 10 minutes
+  workflow_dispatch:  # Allows manual run
 
 jobs:
-  post_deals:
+  post_to_blogger:
     runs-on: ubuntu-latest
-    timeout-minutes: 9999  # Keep running for a long time
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
-      - name: Install dependencies
-run: pip install requests google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
+      - name: Install Dependencies
+        run: pip install requests google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
 
-
-      - name: Run script continuously
+      - name: Run Blogger Auto-Post Script
+        env:
+          SECRET_BLOGGER_BLOG_ID: ${{ secrets.SECRET_BLOGGER_BLOG_ID }}
         run: python post_to_blogger.py
